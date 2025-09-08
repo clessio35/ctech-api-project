@@ -1,0 +1,131 @@
+
+# Ctech - Sistema de Pedidos
+
+Aplicação **Spring Boot** para gerenciamento de pedidos, utilizando **RabbitMQ** para mensageria e **H2** como banco de dados em memória/persistente.
+ O projeto está preparado para rodar **localmente** ou via **Docker**.
+
+---
+
+## Tecnologias utilizadas
+
+- Java 17  
+- Spring Boot 3.5  
+- Spring Data JPA  
+- Spring AMQP (RabbitMQ)  
+- H2 Database  
+- Maven  
+- Docker & Docker Compose  
+
+---
+
+## Estrutura do Projeto
+
+ctech/
+├─ src/main/java/ctech/
+│ ├─ config/ # Configurações do RabbitMQ
+│ ├─ controller/ # Controllers REST
+│ ├─ dto/ # DTOs de entrada/saída
+│ ├─ messaging/ # Producer de mensagens para RabbitMQ
+│ ├─ model/ # Entidades JPA
+│ ├─ repository/ # Repositórios Spring Data JPA
+│ └─ service/ # Lógica de negócio
+├─ src/main/resources/
+│ └─ application.properties # Configurações da aplicação
+├─ Dockerfile
+├─ docker-compose.yml
+└─ pom.xml
+
+---
+
+## Configuração do Projeto
+
+### `application.properties`
+
+```properties
+# Porta da aplicação
+server.port=9099
+server.address=0.0.0.0   # Aceita conexões externas (Docker)
+
+# Configuração H2 (persistente em arquivo)
+spring.datasource.url=jdbc:h2:file:/data/ctechdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.jpa.hibernate.ddl-auto=update
+
+# RabbitMQ (variáveis de ambiente para Docker)
+spring.rabbitmq.host=${SPRING_RABBITMQ_HOST:rabbitmq}
+spring.rabbitmq.port=${SPRING_RABBITMQ_PORT:5672}
+spring.rabbitmq.username=${SPRING_RABBITMQ_USERNAME:guest}
+spring.rabbitmq.password=${SPRING_RABBITMQ_PASSWORD:guest}
+
+# Logs
+logging.level.org.springframework=INFO
+logging.level.ctech=DEBUG
+Rodando Localmente
+Compile e rode a aplicação;
+
+no bash:
+mvn clean spring-boot:run
+Endpoints REST disponíveis:
+
+Método	URL	Descrição
+POST	/api/pedidos	Cria um pedido (JSON PedidoDTO)
+GET	/api/pedidos	Lista todos os pedidos
+GET	/api/pedidos/{id}	Busca pedido por ID
+
+Exemplo de JSON para criação de pedido:
+
+json
+{
+  "descricao": "Pedido teste",
+  "valor": 150.5
+}
+
+Rodando com Docker
+docker-compose.yml
+
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"     # Porta AMQP
+      - "15672:15672"   # Painel de gerenciamento
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  ctech:
+    build: .           # Usa o Dockerfile da raiz
+    container_name: ctech
+    ports:
+      - "9099:9099"
+    depends_on:
+      - rabbitmq
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      
+Rodando os containers
+docker-compose up --build
+
+RabbitMQ ficará disponível em http://localhost:15672
+Usuário: guest
+Senha: guest
+
+Aplicação Spring Boot disponível em http://localhost:9099
+
+Observações
+Certifique-se de que a porta 9099 está livre no seu sistema.
+
+Para usar H2 persistente no Docker, o banco será criado no caminho /data/ctechdb dentro do container.
+
+Logs detalhados podem ser visualizados no console do container ou localmente.
+
+Todos os endpoints seguem o padrão REST e retornam JSON.
