@@ -1,7 +1,27 @@
-# Remova a linha "version: '3'"
+version: '3.8'
+
 services:
   rabbitmq:
     image: rabbitmq:3-management
+    container_name: rabbitmq
     ports:
-      - "5672:5672"     # Porta padrão de comunicação AMQP
-      - "15672:15672"   # Painel de gerenciamento (acesso pelo browser)
+      - "5672:5672"     # Porta AMQP
+      - "15672:15672"   # Painel de gerenciamento
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  ctech:
+    build: .   # usa o Dockerfile da raiz
+    container_name: ctech
+    ports:
+      - "9099:9099"       # Porta da aplicação
+    depends_on:
+      - rabbitmq
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+    volumes:
+      - ./h2data:/data    # Persiste o banco H2 entre reinícios
