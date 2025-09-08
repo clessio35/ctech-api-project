@@ -3,6 +3,7 @@ package ctech.service;
 import org.springframework.stereotype.Service;
 
 import ctech.dto.PedidoDTO;
+import ctech.messaging.producer.PedidoProducer;
 import ctech.model.Pedido;
 import ctech.repository.PedidoRepository;
 
