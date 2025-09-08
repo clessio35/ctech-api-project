@@ -1,0 +1,7 @@
+# Remova a linha "version: '3'"
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"     # Porta padrão de comunicação AMQP
+      - "15672:15672"   # Painel de gerenciamento (acesso pelo browser)

@@ -3,6 +3,7 @@ package ctech.messaging.consumer;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import ctech.config.RabbitMQConfig;
 import ctech.model.Pedido;
 
 @Component
